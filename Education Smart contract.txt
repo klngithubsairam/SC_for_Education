@@ -1,0 +1,62 @@
+//Smart contract for Education
+
+pragma solidity ^0.4.24;
+contract BCOwner{
+    address Owner;
+
+    struct student{
+        bool isuidgenerated;
+        string name;
+        string degree;
+        uint marks;
+        string grade;
+    }
+
+    mapping ( address => student) public studentmapping;
+    mapping ( address => bool) public authoritymapping;
+
+    constructor() {
+        Owner = msg.sender;
+    }
+
+    modifier onlyOwner(){
+        require (Owner == msg.sender);
+        _;
+    }
+
+    function setAuthority( address _address) onlyOwner{
+        require(!authoritymapping[_address]);
+        authoritymapping[_address] = true;
+    }
+
+    function setStudentData (address uniqueId, string _name, string _degree, uint _marks, string _grade) returns ( string ) {
+        require( authoritymapping[msg.sender]);
+        require(studentmapping[uniqueId].isuidgenerated);
+        
+        studentmapping[uniqueId].name = _name;
+        studentmapping[uniqueId].degree = _degree;
+        studentmapping[uniqueId].marks = _marks;
+        studentmapping[uniqueId].grade = _grade;
+        return "Student details has been updated successfully in Blockchain";
+        
+    }
+
+    function setStudentAddress(string _name, string _AadharNo) onlyOwner returns ( address ) {
+        //require( authoritymapping[msg.sender]);
+        address uniqueId = address(sha256(msg.sender, now));
+        require(!studentmapping[uniqueId].isuidgenerated);
+        studentmapping[uniqueId].isuidgenerated = true;
+        return uniqueId; 
+        
+    }
+
+}
+
+// setStudentAddress("RAMA","1234567890") must be call by owner account, then it returns address for student RAMA
+// setAuthority() must be call by owner account, by providing another address (Authority address) as input for this function.
+// Here Authority address, we may choose from ACCOUNT Dropdown box present at left-top corner in Remix IDE site. 
+// setStudentData("RAMA Address","RAMA","ME",900,"Distinction") must be call through Authority account.
+// To view student details, enter student address in the "student mapping" text box and submit 
+//   (irrespective of any account either owner or authority), in the Remix IDE site.
+
+				-------------------------------------------------
